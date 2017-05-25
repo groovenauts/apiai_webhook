@@ -1,0 +1,19 @@
+service: apiai
+runtime: go
+api_version: go1
+skip_files:
+- ^(.*/)?#.*#$
+- ^(.*/)?.*~$
+- ^(.*/)?.*\.py[co]$
+- ^(.*/)?.*/RCS/.*$
+- ^(.*/)?\..*$
+- ^pkg/
+handlers:
+- url: "/.*"
+  script: _go_app
+env_variables:
+  API_TOKEN: XXXXXXXXXXXXXXXXX
+  BLOCKS_URL: https://myboard.magellanic-clouds.net
+  BLOCKS_API_TOKEN: ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+automatic_scaling:
+  max_concurrent_requests: 24
