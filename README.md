@@ -1,4 +1,4 @@
-# magellan-gcs-uploader
+# apiai_webhook
 
 ## Run local server
 
@@ -11,7 +11,9 @@ goapp serve
 Specify GCP project id and api tokens (comma separated).
 
 ```
-appcfg.py -E API_TOKEN:XXXXXXXX -E BLOCKS_URL:https://xxxx.magellanic-clouds.net/ -E BLOCKS_API_TOKEN:xxxxxx update .
+cp app.yaml.example app.yaml
+(Edit app.yaml to setup environments)
+gcloud --project ${PROJECT_ID} app deploy app.yaml -v v1
 ```
 
 ### Environment Variables
