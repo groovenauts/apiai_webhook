@@ -34,7 +34,7 @@ func mustGetenv(ctx context.Context, k string) string {
 	return v
 }
 
-func verifyApiToken(token string) error {
+func VerifyApiToken(token string) error {
 	for _, x := range apiTokens {
 		if x == token {
 			return nil
@@ -154,7 +154,7 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
 	if apiTokens == nil {
 		apiTokens = strings.Split(mustGetenv(ctx, "API_TOKEN"), ",")
 	}
-	err := verifyApiToken(api_key)
+	err := VerifyApiToken(api_key)
 	if err != nil {
 		response.Speech = err.Error()
 		code = 401
