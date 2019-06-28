@@ -1,2 +1,5 @@
 /*.yaml
 /pkg
+.*.swp
+/pkg/*
+/src

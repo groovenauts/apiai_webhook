@@ -1,16 +1,5 @@
 service: apiai
-runtime: go
-api_version: go1.9
-skip_files:
-- ^(.*/)?#.*#$
-- ^(.*/)?.*~$
-- ^(.*/)?.*\.py[co]$
-- ^(.*/)?.*/RCS/.*$
-- ^(.*/)?\..*$
-- ^pkg/
-handlers:
-- url: "/.*"
-  script: _go_app
+runtime: go111
 env_variables:
   API_TOKEN: XXXXXXXXXXXXXXXXX
   BLOCKS_URL: https://myboard.magellanic-clouds.net

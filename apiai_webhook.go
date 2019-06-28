@@ -6,10 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"golang.org/x/net/context"
-	"google.golang.org/appengine"
-	"google.golang.org/appengine/log"
-	"google.golang.org/appengine/urlfetch"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -21,15 +19,10 @@ var (
 	apiTokens []string
 )
 
-func init() {
-	apiTokens = nil
-	http.HandleFunc("/intent", postHandler)
-}
-
 func mustGetenv(ctx context.Context, k string) string {
 	v := os.Getenv(k)
 	if v == "" {
-		log.Criticalf(ctx, "%s environment variable not set.", k)
+		log.Printf("%s environment variable not set.", k)
 	}
 	return v
 }
@@ -61,7 +54,7 @@ type Response struct {
 }
 
 func postBlocksFlow(ctx context.Context, blocks_url, blocks_api_token, intent string, data []byte) (int, error) {
-	client := urlfetch.Client(ctx)
+	client := &http.Client{}
 	req, err := http.NewRequest("POST", blocks_url+"/flows/"+intent+".json", bytes.NewBuffer(data))
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+blocks_api_token)
@@ -77,7 +70,7 @@ func postBlocksFlow(ctx context.Context, blocks_url, blocks_api_token, intent st
 		return 0, err
 	}
 	jid := &BlocksInvokeResponse{}
-	log.Infof(ctx, "BLOCKS flow invoke response = %s", buf)
+	log.Printf("BLOCKS flow invoke response = %s", buf)
 	err = json.Unmarshal(buf, &jid)
 	if err != nil {
 		return 0, err
@@ -87,7 +80,7 @@ func postBlocksFlow(ctx context.Context, blocks_url, blocks_api_token, intent st
 
 func getBlocksFlowResult(ctx context.Context, blocks_url, blocks_api_token, intent string, job_id int) (string, error) {
 	for true {
-		client := urlfetch.Client(ctx)
+		client := &http.Client{}
 		req, err := http.NewRequest("GET", blocks_url+"/flows/"+intent+"/jobs/"+strconv.Itoa(job_id)+"/status.txt", bytes.NewBuffer([]byte("")))
 		req.Header.Set("Authorization", "Bearer "+blocks_api_token)
 		res, err := client.Do(req)
@@ -123,8 +116,7 @@ func getBlocksFlowResult(ctx context.Context, blocks_url, blocks_api_token, inte
 }
 
 func postHandler(w http.ResponseWriter, r *http.Request) {
-	ctx := appengine.NewContext(r)
-	//projectId := appengine.AppID(ctx)
+	ctx := r.Context()
 	response := Response{"something wrong."}
 	rawResponseJson := []byte(nil)
 	code := 500
@@ -137,7 +129,7 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
 		} else {
 			outjson, e := json.Marshal(response)
 			if e != nil {
-				log.Errorf(ctx, e.Error())
+				log.Printf(e.Error())
 			}
 			http.Error(w, string(outjson), code)
 		}
@@ -167,22 +159,22 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
 		code = 500
 		return
 	}
-	log.Infof(ctx, "%s", body)
+	log.Printf("%s", body)
 	intent := &RequestIntent{}
 	err = json.Unmarshal(body, &intent)
 	if err != nil {
-		log.Errorf(ctx, "Error occur during decode API.AI request: %s", err.Error())
+		log.Printf("Error occur during decode API.AI request: %s", err.Error())
 		response.Speech = err.Error()
 		code = 500
 		return
 	}
 	intentName := strings.Replace(intent.Result.Metadata.IntentName, "..", "", -1)
-	log.Infof(ctx, "intentName = %s", intentName)
+	log.Printf("intentName = %s", intentName)
 	blocks_url := os.Getenv("BLOCKS_URL")
 	blocks_api_token := os.Getenv("BLOCKS_API_TOKEN")
 	job_id, err := postBlocksFlow(ctx, blocks_url, blocks_api_token, intentName, body)
 	if err != nil {
-		log.Errorf(ctx, "Error occur during BLOCKS Job invocation: %s", err.Error())
+		log.Printf("Error occur during BLOCKS Job invocation: %s", err.Error())
 		response.Speech = "Error occur during BLOCKS Job invocation."
 		code = 500
 		return
@@ -191,14 +183,28 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
 	result, err := getBlocksFlowResult(ctx, blocks_url, blocks_api_token, intentName, job_id)
 
 	if err != nil {
-		log.Errorf(ctx, "get BLOCKS job result failed: %", err.Error())
+		log.Printf("get BLOCKS job result failed: %v", err.Error())
 		response.Speech = "Error occur during getting BLOCKS Job result." + err.Error()
 		code = 500
 		return
 	}
 
-	log.Infof(ctx, "Response = %s", result)
+	log.Printf("Response = %s", result)
 	rawResponseJson = []byte(result)
 	code = 200
 	return
+}
+
+func main() {
+	apiTokens = nil
+	http.HandleFunc("/intent", postHandler)
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+		log.Printf("Defaulting to port %s", port)
+	}
+
+	log.Printf("Listening on port %s", port)
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
 }
