@@ -8,3 +8,4 @@ pkg/
 src/
 makepkg.sh
 README.md
+apiai_webhook
