@@ -2,10 +2,10 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"golang.org/x/net/context"
 	"io/ioutil"
 	"log"
 	"net/http"
