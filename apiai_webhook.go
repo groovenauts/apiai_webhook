@@ -37,11 +37,11 @@ func VerifyApiToken(token string) error {
 }
 
 type RequestIntent struct {
-	Result struct {
-		Metadata struct {
-			IntentName string `json:"intentName"`
-		} `json:"metadata"`
-	} `json:"result"`
+	QueryResult struct {
+		Intent struct {
+			DisplayName string `json:"displayName"`
+		} `json:"intent"`
+	} `json:"queryResult"`
 }
 
 type BlocksInvokeResponse struct {
@@ -168,7 +168,7 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
 		code = 500
 		return
 	}
-	intentName := strings.Replace(intent.Result.Metadata.IntentName, "..", "", -1)
+	intentName := strings.Replace(intent.QueryResult.Intent.DisplayName, "..", "", -1)
 	log.Printf("intentName = %s", intentName)
 	blocks_url := os.Getenv("BLOCKS_URL")
 	blocks_api_token := os.Getenv("BLOCKS_API_TOKEN")
