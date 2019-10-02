@@ -1,11 +1,5 @@
 # apiai_webhook
 
-## Run local server
-
-```
-goapp serve
-```
-
 ## Deploy
 
 Specify GCP project id and api tokens (comma separated).
