@@ -77,7 +77,7 @@ jobs:
       - name: Stage application code to Cloud Storage
         run: |
           set -x
-          bucket=staging.${CLOUDSDK_CORE_PROJECT}.appspot.com
+          bucket=${{ secrets.GCP_STAGE_BUCKET }}
           version=$(basename ${{ github.ref }})
           ./stage.sh ${bucket} ${version}
 
