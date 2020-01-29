@@ -1,0 +1,72 @@
+#
+# https://help.github.com/en/actions/automating-your-workflow-with-github-actions
+#
+
+name: CI
+
+on:
+  push:
+    branches:
+      - '**'
+
+jobs:
+  dump:
+    name: Dump env vars, contexts
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '[ci skip]')"
+    env:
+      GO111MODULE: on
+    steps:
+      - name: Environment Variables
+        run: export -p
+
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+      - name: Dump job context
+        env:
+          JOB_CONTEXT: ${{ toJson(job) }}
+        run: echo "$JOB_CONTEXT"
+      - name: Dump steps context
+        env:
+          STEPS_CONTEXT: ${{ toJson(steps) }}
+        run: echo "$STEPS_CONTEXT"
+      - name: Dump runner context
+        env:
+          RUNNER_CONTEXT: ${{ toJson(runner) }}
+        run: echo "$RUNNER_CONTEXT"
+      - name: Dump strategy context
+        env:
+          STRATEGY_CONTEXT: ${{ toJson(strategy) }}
+        run: echo "$STRATEGY_CONTEXT"
+      - name: Dump matrix context
+        env:
+          MATRIX_CONTEXT: ${{ toJson(matrix) }}
+        run: echo "$MATRIX_CONTEXT"
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '[ci skip]')"
+    steps:
+      # https://github.com/actions/checkout
+      - uses: actions/checkout@v2
+
+      # https://github.com/actions/setup-go
+      - uses: actions/setup-go@v1
+        with:
+          go-version: '1.11.x'
+
+      - name: Check golang version/env
+        run: |
+          set -x
+          go version
+          go env
+
+      - name: build
+        run: go build
+
+      - name: test
+        run: go test
+
