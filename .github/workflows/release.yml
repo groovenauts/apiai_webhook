@@ -46,8 +46,8 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
-    #env:
-    #  GO111MODULE: on
+    env:
+      GO111MODULE: on
     steps:
       # https://github.com/actions/checkout
       - uses: actions/checkout@v2
