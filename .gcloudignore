@@ -1,11 +1,11 @@
 .git/
+.github/
 .gitignore
 *~
 *.back
 .*.swp
 *.yaml
-pkg/
-src/
-makepkg.sh
+stage.sh
+runtime
 README.md
 apiai_webhook

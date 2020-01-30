@@ -5,6 +5,7 @@
 Specify GCP project id and api tokens (comma separated).
 
 ```
+export GO111MODULE=on
 cp app.yaml.example app.yaml
 (Edit app.yaml to setup environments)
 gcloud --project ${PROJECT_ID} app deploy app.yaml -v v1
